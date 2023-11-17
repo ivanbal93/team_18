@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from sqlalchemy import String, Integer, TIMESTAMP, ForeignKey, Column, Boolean
+from sqlalchemy import String, Integer, TIMESTAMP, ForeignKey, Column, Boolean, Text
 
-from application.database import Base
+from parsing_application.database import Base
 
 
 class User(Base):
@@ -38,9 +38,10 @@ class News(Base):
     __tablename__ = "news"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    text = Column(String, nullable=False)
+    text = Column(Text, nullable=False)
     is_favourite = Column(Boolean, default=False, nullable=False)
     date = Column(TIMESTAMP, default=datetime.utcnow, index=True)
+    url = Column(String, nullable=False)
     site_id = Column(Integer, ForeignKey("sites.id"))
 
 
@@ -50,7 +51,7 @@ class Comment(Base):
     __tablename__ = 'comments'
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    text = Column(String, nullable=False)
+    text = Column(Text, nullable=False)
     date = Column(TIMESTAMP, default=datetime.utcnow, index=True)
     news_id = Column(Integer, ForeignKey("news.id"))
 
@@ -62,6 +63,3 @@ class CategoryNews(Base):
     id = Column(Integer, primary_key=True, index=True)
     news_id = Column(Integer, ForeignKey("news.id"))
     category_id = Column(Integer, ForeignKey("categories.id"))
-
-
-
