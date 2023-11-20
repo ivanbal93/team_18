@@ -1,11 +1,20 @@
+import sys
+
+sys.path.append("parsing_application/env_config.py")
+
 from typing import Optional
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, IntegerIDMixin
 
-from authentication.database_config import User, get_user_db
+from src.database import User
 
-SECRET = "SECRET"
+from env_config import MANAGER_SECRET
+
+from .utils import get_user_db
+
+
+SECRET = MANAGER_SECRET
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):

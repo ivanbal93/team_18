@@ -3,6 +3,7 @@ from fastapi_users import schemas
 
 class UserRead(schemas.BaseUser[int]):
     id: int
+    email: str
     login: str
     is_admin: bool
     is_active: bool
@@ -15,6 +16,7 @@ class UserRead(schemas.BaseUser[int]):
 
 class UserCreate(schemas.BaseUserCreate):
     id: int
+    email: str
     login: str
     password: str
     is_admin: bool = False
@@ -23,5 +25,5 @@ class UserCreate(schemas.BaseUserCreate):
     is_verified: bool = False
 
 
-# class UserUpdate(schemas.BaseUserUpdate):
-#     pass
+class UserUpdate(schemas.BaseUserUpdate):
+    pass

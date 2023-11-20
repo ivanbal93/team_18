@@ -1,8 +1,14 @@
+import sys
+sys.path.append("parsing_application/env_config.py")
+
 from fastapi_users.authentication import CookieTransport, JWTStrategy, AuthenticationBackend
 
-cookie_transport = CookieTransport(cookie_max_age=3600)
+from env_config import AUTH_SECRET
 
-SECRET = "SECRET"
+cookie_transport = CookieTransport(cookie_max_age=3600,
+                                   cookie_name="parsing_app")
+
+SECRET = AUTH_SECRET
 
 
 def get_jwt_strategy() -> JWTStrategy:

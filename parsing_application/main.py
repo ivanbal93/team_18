@@ -1,15 +1,19 @@
 import uvicorn
 
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi_users import fastapi_users, FastAPIUsers
+from fastapi import FastAPI, Depends
+from fastapi_users import FastAPIUsers
 
-from authentication.auth import auth_backend
-from authentication.database_config import User
-from authentication.manager import get_user_manager
-from authentication.schemas import UserRead, UserCreate
+from src.database import User
 
-from database_config import database
+from src.authentication.config import auth_backend
+from src.authentication.manager import get_user_manager
+from src.authentication.schemas import UserRead, UserCreate
 
+from src.core.routers import site_router, category_router, news_router
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host='127.0.0.1', port=8000, reload=True, workers=3)
 
 fastapi_users = FastAPIUsers[User, int](
     get_user_manager,
@@ -23,32 +27,25 @@ app = FastAPI(
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
     prefix="/auth/jwt",
-    tags=["auth"],
+    tags=["Authentication"],
 )
 
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
     prefix="/auth",
-    tags=["auth"],
+    tags=["Authentication"],
 )
 
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host='127.0.0.1', port=8000, reload=True, workers=3)
-
-
-@app.on_event("startup")
-async def startup_database():
-    '''Подключение к БД'''
-    await database.connect()
+app.include_router(site_router)
+app.include_router(category_router)
+app.include_router(news_router)
 
 
-@app.on_event("shutdown")
-async def shutdown_database():
-    '''Отключение от БД'''
-    await database.disconnect()
+
+#здесь можно будет добавить в параметрах свойства юзера для определения наличия/отсуствия роли админа
+current_user = fastapi_users.current_user()
 
 
-@app.get("/")
-def hello_world():
-    return "Hello, World!"
+@app.get("/protected_route")
+def protected_route(user: User = Depends(current_user)):
+    return f"Hello, {user.login}"
