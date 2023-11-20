@@ -44,8 +44,13 @@ class News(BaseModel):
     title: str
     text: str
     is_favourite: bool
-    date: str
+    date: datetime
     site_id: int
+    url: str
+
+
+class NewsCreate(News):
+    pass
 
 
 class Comment(BaseModel):
@@ -58,7 +63,7 @@ class Comment(BaseModel):
     news_id: int
 
 
-class CategoryNews(Base):
+class CategoryNews(BaseModel):
     '''Промежуточный класс для связи M-t-M'''
 
     id: int

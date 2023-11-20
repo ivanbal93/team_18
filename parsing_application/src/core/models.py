@@ -33,7 +33,7 @@ class News(Base):
     title = Column(String, nullable=False)
     text = Column(Text, nullable=False)
     is_favourite = Column(Boolean, default=False, nullable=False)
-    date = Column(TIMESTAMP, default=datetime.utcnow, index=True)
+    date = Column(TIMESTAMP(timezone=True), default=datetime.utcnow, index=True)
     url = Column(String, nullable=False)
     site_id = Column(Integer, ForeignKey("site.id"))
     categories = relationship("CategoryNews")
