@@ -52,6 +52,9 @@ class News(BaseModel):
 class NewsCreate(News):
     pass
 
+class NewsUpdate(News):
+    pass
+
 
 class Comment(BaseModel):
     '''Класс комментариев к новостям'''
