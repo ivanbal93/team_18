@@ -11,6 +11,14 @@ from src.database import get_async_session
 from .models import Category, Site, News
 from .schemas import NewsCreate, NewsUpdate
 
+
+def pagination_params(
+    limit: int = 10,
+    skip: int = 0
+):
+    return {"limit": limit, "skip": skip}
+
+
 site_router = APIRouter(
     prefix="/site",
     tags=["Site"]
@@ -19,7 +27,7 @@ site_router = APIRouter(
 
 @site_router.get("/")
 async def get_all_sites(
-        session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         query = select(Site).order_by("title")
@@ -37,7 +45,7 @@ category_router = APIRouter(
 
 @category_router.get("/")
 async def get_all_categories(
-        session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         query = select(Category).order_by("title")
@@ -56,7 +64,8 @@ news_router = APIRouter(
 @news_router.get("/")
 @cache(expire=30)
 async def get_all_news(
-        session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    pagination_params: dict = Depends(pagination_params)
 ):
     try:
         query = select(News).order_by("date")
@@ -68,8 +77,8 @@ async def get_all_news(
 
 @news_router.post("/")
 async def add_news(
-        new: NewsCreate,
-        session: AsyncSession = Depends(get_async_session)
+    new: NewsCreate,
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         stmt = insert(News).values(**new.model_dump())
@@ -82,8 +91,8 @@ async def add_news(
 
 @news_router.get("/id/{news_id}")
 async def get_news_by_id(
-        news_id: int,
-        session: AsyncSession = Depends(get_async_session)
+    news_id: int,
+    session: AsyncSession = Depends(get_async_session)
 ):
     query = select(News).where(News.id == news_id)
     result = await session.execute(query)
@@ -95,9 +104,9 @@ async def get_news_by_id(
 
 @news_router.patch("/id/{news_id}/update")
 async def patch_news_by_id(
-        new: NewsUpdate,
-        news_id: int,
-        session: AsyncSession = Depends(get_async_session)
+    new: NewsUpdate,
+    news_id: int,
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         query = select(News).where(News.id == news_id)
@@ -111,8 +120,8 @@ async def patch_news_by_id(
 
 @news_router.delete("/id/{news_id}/delete")
 async def delete_news_by_id(
-        news_id: int,
-        session: AsyncSession = Depends(get_async_session)
+    news_id: int,
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         query = delete(News).where(News.id == news_id)
@@ -124,7 +133,9 @@ async def delete_news_by_id(
 
 
 @news_router.get("/favourites")
-async def get_favourite_news(session: AsyncSession = Depends(get_async_session)):
+async def get_favourite_news(
+    session: AsyncSession = Depends(get_async_session)
+):
     try:
         query = select(News).where(News.is_favourite)
         result = await session.execute(query)
