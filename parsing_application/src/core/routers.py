@@ -104,8 +104,12 @@ async def get_news_by_id(
     news_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
-    query = select(News).where(News.id == news_id)
-    result = await session.execute(query)
+    try:
+        query = select(News).where(News.id == news_id)
+        result = await session.execute(query)
+    except Exception:
+        raise HTTPException(status_code=501, detail="Ошибка сервера")
+
     if result.scalar():
         return result.scalar()
     else:

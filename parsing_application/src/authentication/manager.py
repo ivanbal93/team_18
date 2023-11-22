@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, IntegerIDMixin
 
-from src.database import User
+from .models import User
 
 from env_config import MANAGER_SECRET
 
