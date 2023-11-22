@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
+from env_config import REDIS_HOST, REDIS_PORT
 from src.authentication.config import auth_backend, fastapi_users
 from src.authentication.routers import user_router
 from src.authentication.schemas import UserRead, UserCreate
@@ -57,5 +58,9 @@ app.include_router(user_router)
 # Кеширование
 @app.on_event("startup")
 async def startup():
-    redis = aioredis.from_url("redis://localhost")
+    redis = aioredis.from_url(
+        f"redis://{REDIS_HOST}:{REDIS_PORT}",
+        encoding="utf-8",
+        decode_responses=True
+    )
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")

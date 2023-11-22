@@ -1,0 +1,37 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:15
+    container_name: db
+    command: -p 5432
+    expose:
+      - 5432
+    env_file:
+      - .env
+
+  redis:
+    image: redis:7
+    container_name: redis
+    command: --port 6379
+    expose:
+      - 6379
+    env_file:
+      - .env
+
+  fastapi:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: fastapi
+    command: >
+      sh -c 
+        "alembic upgrade head
+        gunicorn main:app --reload --workers 3 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/src
+    depends_on:
+      - db
+      - redis
