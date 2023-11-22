@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.exceptions import HTTPException
 
 from fastapi_cache.decorator import cache
@@ -19,15 +19,25 @@ def pagination_params(
     return {"limit": limit, "skip": skip}
 
 
+# def check_user(
+#     request: Request
+# ):
+#     if not request.user.is_authenticated:
+#         raise HTTPException(
+#             status_code=403,
+#             detail="Доступ к ресурсу запрещён"
+#         )
+
+
 site_router = APIRouter(
     prefix="/site",
-    tags=["Site"]
+    tags=["Site"],
 )
 
 
 @site_router.get("/")
 async def get_all_sites(
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
 ):
     try:
         query = select(Site).order_by("title")
