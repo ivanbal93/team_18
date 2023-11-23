@@ -1,11 +1,15 @@
+import fastapi_users.router
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import EmailStr
 
-from sqlalchemy import select
+from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
+from .config import auth_backend
 
 from .models import User
+from .schemas import UserUpdate
 
 user_router = APIRouter(
     prefix="/user",
@@ -13,7 +17,11 @@ user_router = APIRouter(
 )
 
 
-@user_router.get("/")
+@user_router.get(
+    path="/",
+    description=f"Получение всех объектов класса User. "
+                f"Сортировка по id.",
+)
 async def get_all_users(
     session: AsyncSession = Depends(get_async_session)
 ):
@@ -21,22 +29,81 @@ async def get_all_users(
         query = select(User).order_by("id")
         result = await session.execute(query)
         return result.scalars().all()
+
     except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+        raise HTTPException(status_code=500, detail="Ошибка сервера")
 
 
-@user_router.get("/id/{user_id}")
-async def get_user_by_id(
-    user_id: int,
+@user_router.get(
+    path="/email/{user_email}",
+    description=f"Получение объекта класса User по его email. "
+                f"При отсутствии объекта возвращается 404."
+)
+async def get_user_by_email(
+    user_email: EmailStr,
     session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        query = select(User).where(User.id == user_id)
+        query = select(User).where(User.email == user_email)
         result = await session.execute(query)
-    except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+        result_final = result.scalars().one_or_none()
+        if not result_final:
+            raise NameError()
+        return result_final
 
-    if result.scalar():
-        return result.scalar()
-    else:
-        raise HTTPException(status_code=404, detail="id не существует")
+    except NameError:
+        raise HTTPException(
+            status_code=404,
+            detail="Пользователя с такой электронной почтой не существует"
+        )
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
+
+
+@user_router.patch(
+    path="/email/{user_email}",
+    description=f"Апдейт объекта класса User."
+                f"Обязательные поля для заполнения: email, login, password."
+
+)
+async def update_user_by_email(
+    new: UserUpdate,
+    user_email: EmailStr,
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        stmt = update(User).values(**new.model_dump()).where(User.email == user_email)
+        await session.execute(stmt)
+        await session.commit()
+        return {"message": "Информация о пользователе успешно обновлена!"}
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
+
+
+@user_router.delete(
+    path="/email/{user_email}",
+    description="Удаление объекта класса User."
+)
+async def delete_user_by_email(
+    user_email: EmailStr,
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        query = delete(User).where(User.email == user_email)
+        await session.execute(query)
+        await session.commit()
+        return {"message": f"Пользователь {user_email} успешно удалён!"}
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )

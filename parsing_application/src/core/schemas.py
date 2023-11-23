@@ -1,25 +1,12 @@
 from datetime import datetime
+from typing import Optional
 
-from pydantic import BaseModel, Field
-
-
-class User(BaseModel):
-    '''Класс пользователей'''
-
-    id: int
-    login: str
-    password: str
-    is_admin: bool
-    news_id: int
-
-    class Config:
-        orm_model = True
+from pydantic import BaseModel
 
 
 class Site(BaseModel):
     '''Класс используемых сайтов'''
 
-    id: str
     title: str
     url: str
 
@@ -40,20 +27,23 @@ class Cateogory(BaseModel):
 class News(BaseModel):
     '''Класс новостей'''
 
-    id: int
     title: str
     text: str
-    is_favourite: bool
-    date: datetime
     site_id: int
     url: str
+
+    class Config:
+        orm_model = True
 
 
 class NewsCreate(News):
     pass
 
-class NewsUpdate(News):
-    pass
+
+class NewsUpdate(BaseModel):
+    title: Optional[str]
+    text: Optional[str]
+    is_favourite: Optional[bool]
 
 
 class Comment(BaseModel):

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.exceptions import HTTPException
 
 from fastapi_cache.decorator import cache
+from pydantic import ValidationError
 
 from sqlalchemy import select, insert, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,23 +20,17 @@ def pagination_params(
     return {"limit": limit, "skip": skip}
 
 
-# def check_user(
-#     request: Request
-# ):
-#     if not request.user.is_authenticated:
-#         raise HTTPException(
-#             status_code=403,
-#             detail="Доступ к ресурсу запрещён"
-#         )
-
-
 site_router = APIRouter(
     prefix="/site",
     tags=["Site"],
 )
 
 
-@site_router.get("/")
+@site_router.get(
+    path="/",
+    description=f"Получение всех объектов класса Site. "
+                f"Сортировка по названию."
+)
 async def get_all_sites(
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -43,8 +38,12 @@ async def get_all_sites(
         query = select(Site).order_by("title")
         result = await session.execute(query)
         return result.scalars().all()
+
     except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
 
 
 category_router = APIRouter(
@@ -53,7 +52,11 @@ category_router = APIRouter(
 )
 
 
-@category_router.get("/")
+@category_router.get(
+    path="/",
+    description=f"Получение всех объектов класса Category. "
+                f"Сортировка по названию."
+)
 async def get_all_categories(
     session: AsyncSession = Depends(get_async_session)
 ):
@@ -61,8 +64,12 @@ async def get_all_categories(
         query = select(Category).order_by("title")
         result = await session.execute(query)
         return result.scalars().all()
+
     except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
 
 
 news_router = APIRouter(
@@ -71,7 +78,11 @@ news_router = APIRouter(
 )
 
 
-@news_router.get("/")
+@news_router.get(
+    path="/",
+    description=f"Получение всех объектов класса News. "
+                f"Сортировка по дате."
+)
 @cache(expire=30)
 async def get_all_news(
     session: AsyncSession = Depends(get_async_session),
@@ -81,11 +92,19 @@ async def get_all_news(
         query = select(News).order_by("date")
         result = await session.execute(query)
         return result.scalars().all()
+
     except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
 
 
-@news_router.post("/")
+@news_router.post(
+    path="/",
+    description=f"Добавление в БД объекта класса News. "
+                f"Обязательные поля для заполнения: title, text, site_id. url"
+)
 async def add_news(
     new: NewsCreate,
     session: AsyncSession = Depends(get_async_session)
@@ -95,11 +114,19 @@ async def add_news(
         await session.execute(stmt)
         await session.commit()
         return {"message": "Новость успешно добавлена!"}
+
     except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
 
 
-@news_router.get("/id/{news_id}")
+@news_router.get(
+    path="/id/{news_id}",
+    description=f"Получение объекта класса News по его id. "
+                f"При отсутствии объекта возвращается 404."
+)
 async def get_news_by_id(
     news_id: int,
     session: AsyncSession = Depends(get_async_session)
@@ -107,16 +134,29 @@ async def get_news_by_id(
     try:
         query = select(News).where(News.id == news_id)
         result = await session.execute(query)
+        result_final = result.scalars().one_or_none()
+        if not result_final:
+            raise NameError()
+        return result_final
+
+    except NameError:
+        raise HTTPException(
+            status_code=404,
+            detail="Новости с таким id не существует"
+        )
+
     except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
-
-    if result.scalar():
-        return result.scalar()
-    else:
-        raise HTTPException(status_code=404, detail="id не существует")
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
 
 
-@news_router.patch("/id/{news_id}/update")
+@news_router.patch(
+    path="/id/{news_id}",
+    description=f"Апдейт объекта класса News. "
+                f"Обязательные поля для заполнения: title, text, is_favourite",
+)
 async def patch_news_by_id(
     new: NewsUpdate,
     news_id: int,
@@ -124,15 +164,25 @@ async def patch_news_by_id(
 ):
     try:
         query = select(News).where(News.id == news_id)
+        result = await session.execute(query)
+        print(result.scalars().first().__dict__)
+
         stmt = update(News).values(**new.model_dump()).where(News.id == news_id)
         await session.execute(stmt)
         await session.commit()
         return {"message": "Новость успешно обновлена!"}
-    except Exception as e:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
 
 
-@news_router.delete("/id/{news_id}/delete")
+@news_router.delete(
+    path="/id/{news_id}",
+    description="Удаление объекта класса News."
+)
 async def delete_news_by_id(
     news_id: int,
     session: AsyncSession = Depends(get_async_session)
@@ -142,20 +192,32 @@ async def delete_news_by_id(
         await session.execute(query)
         await session.commit()
         return {"message": "Новость успешно удалена!"}
+
     except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+        )
 
 
-@news_router.get("/favourites")
+@news_router.get(
+    path="/favourites",
+    description=f"Список объектов класса News, "
+                f"добавленных в Избранное. Сортировка по дате."
+)
 async def get_favourite_news(
     session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        query = select(News).where(News.is_favourite)
+        query = select(News).where(News.is_favourite).order_by("date")
         result = await session.execute(query)
         return result.scalars().all()
+
     except Exception:
-        raise HTTPException(status_code=501, detail="Ошибка сервера")
+        raise HTTPException(
+            status_code=501,
+            detail="Ошибка сервера"
+        )
 
 
 #здесь можно будет добавить в параметрах свойства юзера для определения наличия/отсуствия роли админа

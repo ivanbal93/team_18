@@ -16,3 +16,5 @@ REDIS_PORT = os.environ.get("REDIS_PORT")
 
 AUTH_SECRET = os.environ.get("AUTH_SECRET")
 MANAGER_SECRET = os.environ.get("MANAGER_SECRET")
+
+PARS_APP_SITE = os.environ.get("PARS_APP_SITE")

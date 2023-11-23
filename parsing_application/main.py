@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
-from env_config import REDIS_HOST, REDIS_PORT
+from env_config import REDIS_HOST, REDIS_PORT, PARS_APP_SITE
 from src.authentication.config import auth_backend, fastapi_users
 from src.authentication.routers import user_router
 from src.authentication.schemas import UserRead, UserCreate
@@ -25,6 +25,7 @@ app = FastAPI(
 
 # Настройка CORS
 origins = [
+    PARS_APP_SITE,
     "http://localhost:8000",
 ]
 
