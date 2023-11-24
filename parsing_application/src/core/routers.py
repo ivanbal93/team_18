@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
 
-from .models import Category, Site, News
-from .schemas import NewsCreate, NewsUpdate
+from .models import Category, Site, News, Comment
+from .schemas import NewsCreate, NewsUpdate, CommentCreate, NewsRead
 
 
 def pagination_params(
@@ -123,6 +123,26 @@ async def add_news(
 
 
 @news_router.get(
+    path="/favourites",
+    description=f"Список объектов класса News, "
+                f"добавленных в Избранное. Сортировка по дате."
+)
+async def get_favourite_news(
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        query = select(News).where(News.is_favourite).order_by("date")
+        result = await session.execute(query)
+        return result.scalars().all()
+
+    except Exception:
+        raise HTTPException(
+            status_code=501,
+            detail="Ошибка сервера"
+        )
+
+
+@news_router.get(
     path="/id/{news_id}",
     description=f"Получение объекта класса News по его id. "
                 f"При отсутствии объекта возвращается 404."
@@ -201,23 +221,63 @@ async def delete_news_by_id(
 
 
 @news_router.get(
-    path="/favourites",
-    description=f"Список объектов класса News, "
-                f"добавленных в Избранное. Сортировка по дате."
+    path="/id/{news_id}/comments",
+    description="Получение списка комментариев объекта News."
 )
-async def get_favourite_news(
+async def get_comments_by_news_id(
+    news_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        query = select(News).where(News.is_favourite).order_by("date")
+        query = select(Comment).where(Comment.news_id == news_id)
         result = await session.execute(query)
-        return result.scalars().all()
+        result_final = result.scalars().all()
+
+        if not result_final:
+            raise NameError()
+        return result_final
+
+    except NameError:
+        raise HTTPException(
+            status_code=404,
+            detail="У данной новости ещё нет комментариев администратора"
+        )
 
     except Exception:
         raise HTTPException(
-            status_code=501,
+            status_code=500,
             detail="Ошибка сервера"
-        )
+    )
+
+
+@news_router.post(
+    path="/id/{news_id}/comments",
+    description="Добавление комментария к объекту класса News."
+)
+async def add_comment(
+    comment: CommentCreate,
+    news_id: int,
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        comment_dict = comment.model_dump()
+        comment_dict["news_id"] = news_id
+        stmt = insert(Comment).values(**comment_dict)
+        await session.execute(stmt)
+        await session.commit()
+        return {"message": f"Комментарий успешно добавлен!"}
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
+    )
+
+
+
+
+
+
 
 
 #здесь можно будет добавить в параметрах свойства юзера для определения наличия/отсуствия роли админа

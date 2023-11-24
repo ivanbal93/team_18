@@ -67,7 +67,7 @@ async def get_user_by_email(
 @user_router.patch(
     path="/email/{user_email}",
     description=f"Апдейт объекта класса User."
-                f"Обязательные поля для заполнения: email, password."
+                f"Обязательные поля для заполнения: email, login, password."
 
 )
 async def update_user_by_email(

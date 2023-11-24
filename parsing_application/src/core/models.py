@@ -35,6 +35,8 @@ class News(Base):
     is_favourite = Column(Boolean, default=False, nullable=False)
     date = Column(TIMESTAMP(timezone=True), default=datetime.utcnow, index=True, autoincrement=True)
     url = Column(String, nullable=False)
+    # likes = Column(Integer, nullable=True, default=0)
+    # reposts = Column(Integer, nullable=True, default=0)
     site_id = Column(Integer, ForeignKey("site.id"))
     categories = relationship("CategoryNews")
 

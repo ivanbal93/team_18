@@ -31,9 +31,18 @@ class News(BaseModel):
     text: str
     site_id: int
     url: str
+    category: list
 
     class Config:
         orm_model = True
+
+
+class NewsRead(News):
+    title: str
+    text: str
+    site_id: int
+    url: str
+    date: datetime
 
 
 class NewsCreate(News):
@@ -49,11 +58,16 @@ class NewsUpdate(BaseModel):
 class Comment(BaseModel):
     '''Класс комментариев к новостям'''
 
-    id: int
     title: str
     text: str
-    date: str
     news_id: int
+
+    class Config:
+        orm_model = True
+
+
+class CommentCreate(Comment):
+    pass
 
 
 class CategoryNews(BaseModel):
