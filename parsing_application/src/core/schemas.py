@@ -1,78 +1,32 @@
-from datetime import datetime
-from typing import Optional
-
 from pydantic import BaseModel
 
 
-class Site(BaseModel):
-    '''Класс используемых сайтов'''
-
-    title: str
-    url: str
-
-    class Config:
-        orm_model = True
-
-
-class Cateogory(BaseModel):
-    '''Класс категорий новостей'''
-
-    id: int
-    title: str
-
-    class Config:
-        orm_model = True
-
-
-class News(BaseModel):
-    '''Класс новостей'''
-
+class NewsBase(BaseModel):
     title: str
     text: str
+    like: int
+    repost: int
     site_id: int
     url: str
-    category: list
 
     class Config:
-        orm_model = True
+        orm_mode = True
 
 
-class NewsRead(News):
-    title: str
-    text: str
-    site_id: int
-    url: str
-    date: datetime
-
-
-class NewsCreate(News):
+class NewsCreate(NewsBase):
     pass
 
 
 class NewsUpdate(BaseModel):
-    title: Optional[str]
-    text: Optional[str]
-    is_favourite: Optional[bool]
+    pass
 
 
-class Comment(BaseModel):
-    '''Класс комментариев к новостям'''
-
-    title: str
+class CommentBase(BaseModel):
     text: str
-    news_id: int
 
     class Config:
         orm_model = True
 
 
-class CommentCreate(Comment):
+class CommentCreate(CommentBase):
     pass
-
-
-class CategoryNews(BaseModel):
-    '''Промежуточный класс для связи M-t-M'''
-
-    id: int
-    news_id: int
-    category_id: int

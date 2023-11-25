@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.exceptions import HTTPException
 
 from fastapi_cache.decorator import cache
-from pydantic import ValidationError
 
 from sqlalchemy import select, insert, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 
 from .models import Category, Site, News, Comment
-from .schemas import NewsCreate, NewsUpdate, CommentCreate, NewsRead
+from .schemas import NewsCreate, NewsUpdate, CommentCreate
 
 
 def pagination_params(
@@ -35,7 +34,7 @@ async def get_all_sites(
     session: AsyncSession = Depends(get_async_session),
 ):
     try:
-        query = select(Site).order_by("title")
+        query = select(Site).order_by(Site.title)
         result = await session.execute(query)
         return result.scalars().all()
 
@@ -89,7 +88,7 @@ async def get_all_news(
     pagination_params: dict = Depends(pagination_params)
 ):
     try:
-        query = select(News).order_by("date")
+        query = select(News).order_by(News.date)
         result = await session.execute(query)
         return result.scalars().all()
 
@@ -172,56 +171,56 @@ async def get_news_by_id(
         )
 
 
-@news_router.patch(
-    path="/id/{news_id}",
-    description=f"Апдейт объекта класса News. "
-                f"Обязательные поля для заполнения: title, text, is_favourite",
-)
-async def patch_news_by_id(
-    new: NewsUpdate,
-    news_id: int,
-    session: AsyncSession = Depends(get_async_session)
-):
-    try:
-        query = select(News).where(News.id == news_id)
-        result = await session.execute(query)
-        print(result.scalars().first().__dict__)
+# @news_router.patch(
+#     path="/id/{news_id}",
+#     description=f"Апдейт объекта класса News. "
+#                 f"Обязательные поля для заполнения: title, text, is_favourite",
+# )
+# async def patch_news_by_id(
+#     new: NewsUpdate,
+#     news_id: int,
+#     session: AsyncSession = Depends(get_async_session)
+# ):
+#     try:
+#         query = select(News).where(News.id == news_id)
+#         result = await session.execute(query)
+#         print(result.scalars().first().__dict__)
+#
+#         stmt = update(News).values(**new.model_dump()).where(News.id == news_id)
+#         await session.execute(stmt)
+#         await session.commit()
+#         return {"message": "Новость успешно обновлена!"}
+#
+#     except Exception:
+#         raise HTTPException(
+#             status_code=500,
+#             detail="Ошибка сервера"
+#         )
 
-        stmt = update(News).values(**new.model_dump()).where(News.id == news_id)
-        await session.execute(stmt)
-        await session.commit()
-        return {"message": "Новость успешно обновлена!"}
 
-    except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Ошибка сервера"
-        )
-
-
-@news_router.delete(
-    path="/id/{news_id}",
-    description="Удаление объекта класса News."
-)
-async def delete_news_by_id(
-    news_id: int,
-    session: AsyncSession = Depends(get_async_session)
-):
-    try:
-        query = delete(News).where(News.id == news_id)
-        await session.execute(query)
-        await session.commit()
-        return {"message": "Новость успешно удалена!"}
-
-    except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Ошибка сервера"
-        )
+# @news_router.delete(
+#     path="/id/{news_id}",
+#     description="Удаление объекта класса News."
+# )
+# async def delete_news_by_id(
+#     news_id: int,
+#     session: AsyncSession = Depends(get_async_session)
+# ):
+#     try:
+#         query = delete(News).where(News.id == news_id)
+#         await session.execute(query)
+#         await session.commit()
+#         return {"message": "Новость успешно удалена!"}
+#
+#     except Exception:
+#         raise HTTPException(
+#             status_code=500,
+#             detail="Ошибка сервера"
+#         )
 
 
 @news_router.get(
-    path="/id/{news_id}/comments",
+    path="/id/{news_id}/comments_list",
     description="Получение списка комментариев объекта News."
 )
 async def get_comments_by_news_id(
@@ -251,7 +250,7 @@ async def get_comments_by_news_id(
 
 
 @news_router.post(
-    path="/id/{news_id}/comments",
+    path="/id/{news_id}/comments_list",
     description="Добавление комментария к объекту класса News."
 )
 async def add_comment(
@@ -272,12 +271,6 @@ async def add_comment(
             status_code=500,
             detail="Ошибка сервера"
     )
-
-
-
-
-
-
 
 
 #здесь можно будет добавить в параметрах свойства юзера для определения наличия/отсуствия роли админа
