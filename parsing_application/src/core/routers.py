@@ -102,7 +102,7 @@ async def get_all_news(
 @news_router.post(
     path="/",
     description=f"Добавление в БД объекта класса News. "
-                f"Обязательные поля для заполнения: title, text, site_id. url"
+                f"Обязательные поля для заполнения: title, text, site_id, url"
 )
 async def add_news(
     new: NewsCreate,

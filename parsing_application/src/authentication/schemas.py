@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi_users import schemas
 from pydantic import EmailStr, BaseModel
 
@@ -23,5 +25,7 @@ class UserCreate(schemas.BaseUserCreate):
 
 
 class UserUpdate(BaseModel):
-    email: EmailStr
-    password: str
+    is_admin: Optional[bool] = False
+
+    class Config:
+        orm_mode = True

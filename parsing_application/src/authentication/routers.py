@@ -1,4 +1,3 @@
-import fastapi_users.router
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import EmailStr
 
@@ -6,10 +5,9 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-from .config import auth_backend
 
 from .models import User
-from .schemas import UserUpdate
+from .schemas import UserUpdate, UserCreate
 
 user_router = APIRouter(
     prefix="/user",
@@ -67,16 +65,16 @@ async def get_user_by_email(
 @user_router.patch(
     path="/email/{user_email}",
     description=f"Апдейт объекта класса User."
-                f"Обязательные поля для заполнения: email, login, password."
+                f"Обязательные поля для заполнения: is_admin."
 
 )
 async def update_user_by_email(
-    new: UserUpdate,
     user_email: EmailStr,
+    is_admin: UserUpdate,
     session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        stmt = update(User).values(**new.model_dump()).where(User.email == user_email)
+        stmt = update(User).where(User.email == user_email).values(is_admin.model_dump())
         await session.execute(stmt)
         await session.commit()
         return {"message": "Информация о пользователе успешно обновлена!"}
