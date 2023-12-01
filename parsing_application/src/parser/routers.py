@@ -25,11 +25,11 @@ parsing_router = APIRouter(
 async def add_news_to_db_from_media_info(
     session: AsyncSession = Depends(get_async_session)
 ):
-    os.system(f"cd src/parser/parser/spiders "
+    os.system(f"cd src/parser/parser/spiders/ "
               f"&& scrapy crawl knife_spider -O knife_media.json")
     with open("src/parser/parser/spiders/knife_media.json", 'r') as file:
         data = json.load(file)
-    # os.system("rm src/parser/parser/spiders/knife_media.json")
+    os.system("rm src/parser/parser/spiders/knife_media.json")
 
     all_cats_query = await session.execute(text("SELECT title FROM category"))
     all_categories = all_cats_query.scalars().all()
