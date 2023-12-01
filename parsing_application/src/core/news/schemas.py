@@ -8,6 +8,9 @@ class NewsCreate(BaseModel):
     text: str
     url: str
     site_id: int
+    views: Optional[int] = 0
+    like: Optional[int] = 0
+    repost: Optional[int] = 0
 
     class Config:
         orm_model = True

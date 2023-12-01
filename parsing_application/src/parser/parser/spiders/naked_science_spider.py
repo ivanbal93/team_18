@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any
 
-from scrapy import Spider, Selector
-from scrapy.http import Response, Request
+from scrapy import Spider
+from scrapy.http import Response
 
 from datetime import date
 
@@ -9,28 +9,29 @@ from datetime import date
 class NakedScienceSpider(Spider):
     name = "naked_science_spider"
     allowed_hosts = ["naked-science.ru"]
-    start_urls = ["https://knife.media/category/news/"]
+    start_urls = ["https://naked-science.ru/article"]
 
     def info_from_page(self, response: Response):
-        today = response.css('div.entry-header__info span.meta__item time::attr(datetime)').get()[:10]
+        today = response.css('div.title span.echo_date::attr(data-published)').get()[:10]
         if today == str(date.today()):
-            if response.css('h1.entry-header__title em::text').get():
-                title = (response.css("h1.entry-header__title::text").get().replace('\xa0', ' ') +
-                         response.css('h1.entry-header__title em::text').get().replace('\xa0', ' '))
-            else:
-                title = response.css("h1.entry-header__title::text").get().replace('\xa0', ' ')
-            text = ' '.join(response.css("div.entry-content p::text").getall()).replace('\xa0', ' ')
+            title = response.css('div.post-title h1::text').get()
+            text = ' '.join(response.css('div.body p::text').getall())
             url = response.url
-            category_list = response.css("div.entry-footer__tags a::text").getall()
+            category_list = []
+            for cat in response.css('div.terms-wrapp a.animate-custom::text').getall():
+                if not cat.startswith('\n'):
+                    category_list.append(cat.replace('# ', ''))
+            views = int(response.css('div.fvc-view span.fvc-count::text').get())
             return {
                 "title": title,
                 "text": text,
                 "url": url,
                 "category_list": category_list,
-                "site_id": 1
+                "site_id": 2,
+                "views": views
                 }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        links = response.css('div.widget-news__content a.widget-news__content-link::attr(href)').getall()
+        links = response.css('div.news-item-title a.animate-custom::attr(href)').getall()
         for link in links:
             yield response.follow(url=link, callback=self.info_from_page)

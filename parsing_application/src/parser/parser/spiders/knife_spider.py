@@ -1,7 +1,7 @@
-from typing import Any, Iterable
+from typing import Any
 
-from scrapy import Spider, Selector
-from scrapy.http import Response, Request
+from scrapy import Spider
+from scrapy.http import Response
 
 from datetime import date
 
@@ -12,8 +12,8 @@ class KnifeSpider(Spider):
     start_urls = ["https://knife.media/category/news/"]
 
     def info_from_page(self, response: Response):
-        # today = response.css('div.entry-header__info span.meta__item time::attr(datetime)').get()[:10]
-        # if today == str(date.today()):
+        today = response.css('div.entry-header__info span.meta__item time::attr(datetime)').get()[:10]
+        if today == str(date.today()):
             if response.css('h1.entry-header__title em::text').get():
                 title = (response.css("h1.entry-header__title::text").get().replace('\xa0', ' ') +
                          response.css('h1.entry-header__title em::text').get().replace('\xa0', ' '))
