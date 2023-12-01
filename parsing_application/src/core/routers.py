@@ -21,8 +21,8 @@ parsing_router = APIRouter(
 )
 
 
-@parsing_router.post("/")
-async def add_news_to_db(
+@parsing_router.post("/knife_parsing")
+async def add_news_to_db_from_knife(
     session: AsyncSession = Depends(get_async_session)
 ):
     os.system(f"cd ~/team_18_back/parsing_application/src/parser/parser/spiders "
