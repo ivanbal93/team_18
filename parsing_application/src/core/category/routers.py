@@ -45,7 +45,7 @@ async def get_all_categories(
     description=f"Добавление в БД объекта класса Category. "
                 f"Обязательные поля для заполнения: title, is_active"
 )
-async def add_news(
+async def add_category(
     new: CategoryCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user_is_admin)

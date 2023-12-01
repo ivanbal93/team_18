@@ -41,7 +41,7 @@ async def get_all_sites(
     description=f"Добавление в БД объекта класса Site. "
                 f"Обязательные поля для заполнения: title, url"
 )
-async def add_news(
+async def add_site(
     new: SiteCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user_is_admin)
@@ -64,7 +64,7 @@ async def add_news(
     description=f"Получение объекта класса Site по его id. "
                 f"При отсутствии объекта возвращается 404."
 )
-async def get_cat_by_id(
+async def get_site_by_id(
     cat_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
@@ -94,7 +94,7 @@ async def get_cat_by_id(
     description=f"Апдейт объекта класса Site. "
                 f"Обязательные поля для заполнения: is_active",
 )
-async def patch_cat_by_id(
+async def patch_site_by_id(
     new: SiteUpdate,
     cat_id: int,
     session: AsyncSession = Depends(get_async_session),
@@ -117,7 +117,7 @@ async def patch_cat_by_id(
     path="/id/{cat_id}",
     description="Удаление объекта класса Site."
 )
-async def delete_cat_by_id(
+async def delete_site_by_id(
     cat_id: int,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user_is_admin)
