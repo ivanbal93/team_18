@@ -6,7 +6,6 @@ from pydantic import EmailStr, BaseModel
 
 class UserRead(schemas.BaseUser[int]):
     email: str
-    is_admin: bool
     is_active: bool
     is_superuser: bool
     is_verified: bool
@@ -18,14 +17,13 @@ class UserRead(schemas.BaseUser[int]):
 class UserCreate(schemas.BaseUserCreate):
     email: EmailStr
     password: str
-    is_admin: bool = False
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
 
 
 class UserUpdate(BaseModel):
-    is_admin: Optional[bool] = False
+    is_superuser: Optional[bool] = False
 
     class Config:
         orm_mode = True

@@ -5,6 +5,7 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
+from .config import current_user_is_admin
 
 from .models import User
 from .schemas import UserUpdate, UserCreate
@@ -21,7 +22,8 @@ user_router = APIRouter(
                 f"Сортировка по id.",
 )
 async def get_all_users(
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
 ):
     try:
         query = select(User).order_by("id")
@@ -39,7 +41,8 @@ async def get_all_users(
 )
 async def get_user_by_email(
     user_email: EmailStr,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
 ):
     try:
         query = select(User).where(User.email == user_email)
@@ -71,7 +74,8 @@ async def get_user_by_email(
 async def update_user_by_email(
     user_email: EmailStr,
     is_admin: UserUpdate,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
 ):
     try:
         stmt = update(User).where(User.email == user_email).values(is_admin.model_dump())
@@ -92,7 +96,8 @@ async def update_user_by_email(
 )
 async def delete_user_by_email(
     user_email: EmailStr,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
 ):
     try:
         query = delete(User).where(User.email == user_email)

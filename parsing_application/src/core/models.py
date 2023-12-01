@@ -1,6 +1,6 @@
 from datetime import datetime
-import pytz
 
+import pytz
 from sqlalchemy import String, Integer, ForeignKey, Column, Boolean, Text, Table
 from sqlalchemy.orm import relationship, declarative_base
 

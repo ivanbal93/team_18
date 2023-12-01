@@ -1,6 +1,6 @@
 import sys
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import CookieTransport, JWTStrategy, AuthenticationBackend
 
@@ -31,3 +31,6 @@ fastapi_users = FastAPIUsers[User, int](
     get_user_manager,
     [auth_backend],
 )
+
+current_user_is_auth = fastapi_users.current_user()
+current_user_is_admin = fastapi_users.current_user(superuser=True)

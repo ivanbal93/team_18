@@ -1,20 +1,19 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
-from fastapi_cache.decorator import cache
-
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-
 from .schemas import NewsUpdate, CommentCreate
 from ..models import News, Comment
 from ..utils import pagination_params
-
+from ...authentication.config import current_user_is_admin, current_user_is_auth
+from ...authentication.models import User
 
 news_router = APIRouter(
     prefix="/news",
-    tags=["News"]
+    tags=["News"],
+    dependencies=[Depends(current_user_is_auth)]
 )
 
 
@@ -26,7 +25,7 @@ news_router = APIRouter(
 # @cache(expire=60)
 async def get_all_news(
     session: AsyncSession = Depends(get_async_session),
-    pagination_params: dict = Depends(pagination_params),
+    pagination_params: dict = Depends(pagination_params)
 ):
     try:
         query = select(News).order_by(News.date)
@@ -38,28 +37,6 @@ async def get_all_news(
             status_code=500,
             detail=e.args
         )
-
-
-# @news_router.post(
-#     path="/",
-#     description=f"Добавление в БД объекта класса News. "
-#                 f"Обязательные поля для заполнения: title, text, site_id, url"
-# )
-# async def add_news(
-#     new: NewsCreate,
-#     session: AsyncSession = Depends(get_async_session)
-# ):
-#     try:
-#         stmt = insert(News).values(**new.model_dump())
-#         await session.execute(stmt)
-#         await session.commit()
-#         return {"message": "Новость успешно добавлена!"}
-#
-#     except Exception:
-#         raise HTTPException(
-#             status_code=500,
-#             detail="Ошибка сервера"
-#         )
 
 
 @news_router.get(
@@ -120,7 +97,8 @@ async def get_news_by_id(
 async def patch_news_by_id(
     new: NewsUpdate,
     news_id: int,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
 ):
     try:
         stmt = update(News).values(**new.model_dump()).where(News.id == news_id)
@@ -141,7 +119,8 @@ async def patch_news_by_id(
 )
 async def delete_news_by_id(
     news_id: int,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
 ):
     try:
         query = delete(News).where(News.id == news_id)

@@ -1,9 +1,8 @@
+from datetime import date
 from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
-
-from datetime import date
 
 
 class NakedScienceSpider(Spider):
@@ -28,7 +27,9 @@ class NakedScienceSpider(Spider):
                 "url": url,
                 "category_list": category_list,
                 "site_id": 2,
-                "views": views
+                "views": views,
+                "like": 0,
+                "repost": 0
                 }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

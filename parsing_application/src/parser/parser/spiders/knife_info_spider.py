@@ -1,13 +1,12 @@
+from datetime import date
 from typing import Any
 
 from scrapy import Spider
 from scrapy.http import Response
 
-from datetime import date
-
 
 class KnifeSpider(Spider):
-    name = "knife_spider"
+    name = "knife_info_spider"
     allowed_hosts = ["knife.media"]
     start_urls = ["https://knife.media/category/news/"]
 
@@ -27,7 +26,10 @@ class KnifeSpider(Spider):
                 "text": text,
                 "url": url,
                 "category_list": category_list,
-                "site_id": 1
+                "site_id": 1,
+                "views": 0,
+                "like": 0,
+                "repost": 0
                 }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:

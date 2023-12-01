@@ -7,6 +7,8 @@ from fastapi.exceptions import HTTPException
 from sqlalchemy import insert, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.authentication.config import current_user_is_auth
+from src.authentication.models import User
 from src.database import get_async_session
 from src.core.category.schemas import CategoryCreate
 from src.core.news.schemas import NewsCreate
@@ -26,10 +28,11 @@ parsing_router = APIRouter(
     description=f"Сбор данных с сайта knife.media"
 )
 async def add_news_to_db_from_media_info(
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_auth)
 ):
     os.system(f"cd src/parser/parser/spiders/ "
-              f"&& scrapy crawl knife_spider -O knife_media.json")
+              f"&& scrapy crawl knife_info_spider -O knife_media.json")
     with open("src/parser/parser/spiders/knife_media.json", 'r') as file:
         data = json.load(file)
     os.system("rm src/parser/parser/spiders/knife_media.json")
@@ -99,13 +102,14 @@ async def add_news_to_db_from_media_info(
     description="Сбор данных с сайта naked-science.ru"
 )
 async def add_news_to_db_from_naked_science(
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_auth)
 ):
     os.system(f"cd src/parser/parser/spiders/ "
               f"&& scrapy crawl naked_science_spider -O naked_science.json")
     with open("src/parser/parser/spiders/naked_science.json", 'r') as file:
         data = json.load(file)
-    os.system("rm src/parser/parser/spiders/knife_media.json")
+    os.system("rm src/parser/parser/spiders/naked_science.json")
 
     all_cats_query = await session.execute(text("SELECT title FROM category"))
     all_categories = all_cats_query.scalars().all()

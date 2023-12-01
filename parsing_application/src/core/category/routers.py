@@ -1,17 +1,22 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.category.schemas import CategoryUpdate
+from src.authentication.config import current_user_is_admin, current_user_is_auth
+from src.authentication.models import User
+
+from src.core.category.schemas import CategoryUpdate, CategoryCreate
 from src.core.models import Category
+
 from src.database import get_async_session
 
 
 category_router = APIRouter(
     prefix="/category",
-    tags=["Category"]
+    tags=["Category"],
+    dependencies=[Depends(current_user_is_auth)]
 )
 
 
@@ -21,7 +26,7 @@ category_router = APIRouter(
                 f"Сортировка по названию."
 )
 async def get_all_categories(
-    session: AsyncSession = Depends(get_async_session),
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         query = select(Category).order_by("title")
@@ -32,6 +37,29 @@ async def get_all_categories(
         raise HTTPException(
             status_code=500,
             detail=e.args
+        )
+
+
+@category_router.post(
+    path="/",
+    description=f"Добавление в БД объекта класса Category. "
+                f"Обязательные поля для заполнения: title, is_active"
+)
+async def add_news(
+    new: CategoryCreate,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
+):
+    try:
+        stmt = insert(Category).values(**new.model_dump())
+        await session.execute(stmt)
+        await session.commit()
+        return {"message": "Категория успешно добавлена!"}
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Ошибка сервера"
         )
 
 
@@ -73,7 +101,8 @@ async def get_cat_by_id(
 async def patch_cat_by_id(
     new: CategoryUpdate,
     cat_id: int,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
 ):
     try:
         stmt = update(Category).values(**new.model_dump()).where(Category.id == cat_id)
@@ -94,7 +123,8 @@ async def patch_cat_by_id(
 )
 async def delete_cat_by_id(
     cat_id: int,
-    session: AsyncSession = Depends(get_async_session)
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user_is_admin)
 ):
     try:
         query = delete(Category).where(Category.id == cat_id)
