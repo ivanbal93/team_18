@@ -1,5 +1,3 @@
-import uvicorn
-
 from redis import asyncio as aioredis
 
 from fastapi import FastAPI
@@ -14,7 +12,8 @@ from src.authentication.config import auth_backend, fastapi_users
 from src.authentication.routers import user_router
 from src.authentication.schemas import UserRead, UserCreate
 
-from src.core.routers import parsing_router
+from src.parser.routers import parsing_router
+
 from src.core.category.routers import category_router
 from src.core.news.routers import news_router
 from src.core.site.routers import site_router

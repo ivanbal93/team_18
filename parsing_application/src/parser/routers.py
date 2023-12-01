@@ -11,8 +11,8 @@ from src.database import get_async_session
 from src.core.category.schemas import CategoryCreate
 from src.core.news.schemas import NewsCreate
 
-from .models import Category, News, category_news_table
-from .schemas import CategoryNewsCreate
+from src.core.models import Category, News, category_news_table
+from src.core.schemas import CategoryNewsCreate
 
 
 parsing_router = APIRouter(
@@ -21,16 +21,15 @@ parsing_router = APIRouter(
 )
 
 
-@parsing_router.post("/knife_parsing")
-async def add_news_to_db_from_knife(
+@parsing_router.get("/knife_media_parsing")
+async def add_news_to_db_from_media_info(
     session: AsyncSession = Depends(get_async_session)
 ):
     os.system(f"cd ~/team_18_back/parsing_application/src/parser/parser/spiders "
-              f"&& scrapy crawl knife_spider -O "
-              f"~/team_18_back/parsing_application/src/core/knife.json")
-    with open("./src/core/knife.json", 'r') as file:
+              f"&& scrapy crawl knife_spider -O knife_media.json")
+    with open("src/parser/parser/spiders/knife_media.json", 'r') as file:
         data = json.load(file)
-    os.system("rm ~/team_18_back/parsing_application/src/core/knife.json")
+    # os.system("rm ~/team_18_back/parsing_application/src/core/knife.json")
 
     all_cats_query = await session.execute(text("SELECT title FROM category"))
     all_categories = all_cats_query.scalars().all()
@@ -41,9 +40,9 @@ async def add_news_to_db_from_knife(
     for obj in data:
         if obj["title"] not in all_titles:
             for cat in obj["category_list"]:
-                if cat.lower() not in all_categories:
+                if cat not in all_categories:
                     try:
-                        new_cat = CategoryCreate(title=cat.lower())
+                        new_cat = CategoryCreate(title=cat)
                         stmt = insert(Category).values(**new_cat.model_dump())
                         await session.execute(stmt)
                         await session.commit()
