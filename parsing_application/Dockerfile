@@ -10,6 +10,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-RUN alembic upgrade head
+RUN alembic upgrade f0ba6ccfd9f1
 
 CMD gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
