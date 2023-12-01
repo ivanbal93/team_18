@@ -31,12 +31,3 @@ fastapi_users = FastAPIUsers[User, int](
     get_user_manager,
     [auth_backend],
 )
-
-current_user = fastapi_users.current_user()
-
-
-def check_user_is_admin(
-    user: User = Depends(current_user)
-):
-    if not user.is_admin:
-        return "Недостаточно прав доступа!"
