@@ -2,7 +2,5 @@
 Мегахакатон SF - команда #18
 Backend
 
-1) source venv/bin/activate
-2) pip install -r requirements.txt
-3) cd application
-4) uvicorn main:app --reload
+1) docker-compose build
+2) docker-compose up

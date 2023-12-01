@@ -9,15 +9,19 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 from env_config import REDIS_HOST, REDIS_PORT, PARS_APP_SITE
+
 from src.authentication.config import auth_backend, fastapi_users
 from src.authentication.routers import user_router
 from src.authentication.schemas import UserRead, UserCreate
 
-from src.core.routers import site_router, category_router, news_router
+from src.core.routers import parsing_router
+from src.core.category.routers import category_router
+from src.core.news.routers import news_router
+from src.core.site.routers import site_router
 
 
-# if __name__ == "__main__":
-#     uvicorn.run("main:app", host='127.0.0.1', port=8000, reload=True, workers=3)
+if __name__ == "__main__":
+    uvicorn.run("main:app", host='127.0.0.1', port=8000, reload=True, workers=3)
 
 app = FastAPI(
     title="Parsing Application"
@@ -57,6 +61,7 @@ app.include_router(site_router)
 app.include_router(category_router)
 app.include_router(news_router)
 app.include_router(user_router)
+app.include_router(parsing_router)
 
 
 # Кеширование

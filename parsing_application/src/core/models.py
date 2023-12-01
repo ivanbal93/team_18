@@ -59,6 +59,7 @@ class News(Base):
     url = Column(String, nullable=False)
     like = Column(Integer, nullable=True, default=0)
     repost = Column(Integer, nullable=True, default=0)
+    views = Column(Integer, nullable=True, default=0)
     site_id = Column(Integer, ForeignKey("site.id", ondelete="CASCADE"))
     category_list = relationship(
         argument="Category",
