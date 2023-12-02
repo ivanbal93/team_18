@@ -12,7 +12,8 @@ from .schemas import UserUpdate, UserCreate
 
 user_router = APIRouter(
     prefix="/user",
-    tags=["User"]
+    tags=["User"],
+    # dependencies=[Depends(current_user_is_admin)]
 )
 
 
@@ -22,8 +23,7 @@ user_router = APIRouter(
                 f"Сортировка по id.",
 )
 async def get_all_users(
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         query = select(User).order_by("id")
@@ -41,8 +41,7 @@ async def get_all_users(
 )
 async def get_user_by_email(
     user_email: EmailStr,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         query = select(User).where(User.email == user_email)
@@ -74,8 +73,7 @@ async def get_user_by_email(
 async def update_user_by_email(
     user_email: EmailStr,
     is_admin: UserUpdate,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         stmt = update(User).where(User.email == user_email).values(is_admin.model_dump())
@@ -96,8 +94,7 @@ async def update_user_by_email(
 )
 async def delete_user_by_email(
     user_email: EmailStr,
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    session: AsyncSession = Depends(get_async_session)
 ):
     try:
         query = delete(User).where(User.email == user_email)

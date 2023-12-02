@@ -12,7 +12,7 @@ from src.database import get_async_session
 site_router = APIRouter(
     prefix="/site",
     tags=["Site"],
-    dependencies=[Depends(current_user_is_auth)]
+    # dependencies=[Depends(current_user_is_auth)]
 )
 
 
@@ -44,7 +44,7 @@ async def get_all_sites(
 async def add_site(
     new: SiteCreate,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    # user: User = Depends(current_user_is_admin)
 ):
     try:
         stmt = insert(Site).values(**new.model_dump())
@@ -98,7 +98,7 @@ async def patch_site_by_id(
     new: SiteUpdate,
     cat_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    # user: User = Depends(current_user_is_admin)
 ):
     try:
         stmt = update(Site).values(**new.model_dump()).where(Site.id == cat_id)
@@ -120,7 +120,7 @@ async def patch_site_by_id(
 async def delete_site_by_id(
     cat_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    # user: User = Depends(current_user_is_admin)
 ):
     try:
         query = delete(Site).where(Site.id == cat_id)

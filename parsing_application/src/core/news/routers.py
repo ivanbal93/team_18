@@ -13,7 +13,7 @@ from ...authentication.models import User
 news_router = APIRouter(
     prefix="/news",
     tags=["News"],
-    dependencies=[Depends(current_user_is_auth)]
+    # dependencies=[Depends(current_user_is_auth)]
 )
 
 
@@ -98,7 +98,7 @@ async def patch_news_by_id(
     new: NewsUpdate,
     news_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    # user: User = Depends(current_user_is_admin)
 ):
     try:
         stmt = update(News).values(**new.model_dump()).where(News.id == news_id)
@@ -120,7 +120,7 @@ async def patch_news_by_id(
 async def delete_news_by_id(
     news_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    # user: User = Depends(current_user_is_admin)
 ):
     try:
         query = delete(News).where(News.id == news_id)

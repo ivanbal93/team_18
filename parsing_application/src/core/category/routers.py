@@ -16,7 +16,7 @@ from src.database import get_async_session
 category_router = APIRouter(
     prefix="/category",
     tags=["Category"],
-    dependencies=[Depends(current_user_is_auth)]
+    # dependencies=[Depends(current_user_is_auth)]
 )
 
 
@@ -48,7 +48,7 @@ async def get_all_categories(
 async def add_category(
     new: CategoryCreate,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    # user: User = Depends(current_user_is_admin)
 ):
     try:
         stmt = insert(Category).values(**new.model_dump())
@@ -102,7 +102,7 @@ async def patch_cat_by_id(
     new: CategoryUpdate,
     cat_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    # user: User = Depends(current_user_is_admin)
 ):
     try:
         stmt = update(Category).values(**new.model_dump()).where(Category.id == cat_id)
@@ -124,7 +124,7 @@ async def patch_cat_by_id(
 async def delete_cat_by_id(
     cat_id: int,
     session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_admin)
+    # user: User = Depends(current_user_is_admin)
 ):
     try:
         query = delete(Category).where(Category.id == cat_id)

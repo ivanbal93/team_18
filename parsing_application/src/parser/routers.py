@@ -19,7 +19,8 @@ from src.core.schemas import CategoryNewsCreate
 
 parsing_router = APIRouter(
     prefix="/parsing",
-    tags=["Parsing"]
+    tags=["Parsing"],
+    # dependencies=[Depends(current_user_is_auth)]
 )
 
 
@@ -28,8 +29,7 @@ parsing_router = APIRouter(
     description=f"Сбор данных с сайта knife.media"
 )
 async def add_news_to_db_from_media_info(
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_auth)
+    session: AsyncSession = Depends(get_async_session)
 ):
     os.system(f"cd src/parser/parser/spiders/ "
               f"&& scrapy crawl knife_info_spider -O knife_media.json")
@@ -102,8 +102,7 @@ async def add_news_to_db_from_media_info(
     description="Сбор данных с сайта naked-science.ru"
 )
 async def add_news_to_db_from_naked_science(
-    session: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_user_is_auth)
+    session: AsyncSession = Depends(get_async_session)
 ):
     os.system(f"cd src/parser/parser/spiders/ "
               f"&& scrapy crawl naked_science_spider -O naked_science.json")
