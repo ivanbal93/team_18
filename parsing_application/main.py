@@ -1,3 +1,6 @@
+import os
+import time
+
 from redis import asyncio as aioredis
 
 from fastapi import FastAPI
@@ -72,3 +75,10 @@ async def startup():
         decode_responses=True
     )
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    while True:
+        os.system(f"GET https://parsing-app.onrender.com/parsing/knife_media")
+        os.system(f"GET https://parsing-app.onrender.com/parsing/naked_science")
+        time.sleep(3600)
+
+
+
