@@ -23,6 +23,7 @@ class Site(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False, unique=True)
     url = Column(String, nullable=False)
+    is_active = Column(Boolean, default=False, nullable=False)
     news_list = relationship(
         argument="News",
         backref="site",
