@@ -64,7 +64,7 @@ async def add_category(
 
 
 @category_router.get(
-    path="/id/{category_id}",
+    path="/id/{cat_id}",
     description=f"Получение объекта класса Category по его id. "
                 f"При отсутствии объекта возвращается 404."
 )

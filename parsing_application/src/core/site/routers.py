@@ -65,11 +65,11 @@ async def add_site(
                 f"При отсутствии объекта возвращается 404."
 )
 async def get_site_by_id(
-    cat_id: int,
+    site_id: int,
     session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        query = select(Site).where(Site.id == cat_id)
+        query = select(Site).where(Site.id == site_id)
         result = await session.execute(query)
         result_final = result.scalars().one_or_none()
         if not result_final:
