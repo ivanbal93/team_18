@@ -9,12 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.authentication.config import current_user_is_auth
 from src.authentication.models import User
+
 from src.database import get_async_session
 from src.core.category.schemas import CategoryCreate
 from src.core.news.schemas import NewsCreate
-
-from src.core.models import Category, News, category_news_table
-from src.core.schemas import CategoryNewsCreate
+from src.core.models import Category, News, category_news_table, category_site_table
+from src.core.schemas import CategoryNewsCreate, CategorySiteCreate
 
 
 parsing_router = APIRouter(
@@ -26,7 +26,8 @@ parsing_router = APIRouter(
 
 @parsing_router.get(
     path="/knife_media",
-    description=f"Сбор данных с сайта knife.media"
+    description=f"Сбор данных с сайта knife.media за сегодняшний день. "
+                f"Перед использованием необходимо добавить объект Site!"
 )
 async def add_news_to_db_from_media_info(
     session: AsyncSession = Depends(get_async_session)
@@ -78,7 +79,6 @@ async def add_news_to_db_from_media_info(
                 for cat in obj["category_list"]:
                     cat_id_query = await session.execute(text(f"SELECT id FROM category WHERE title = '{cat}'"))
                     category_id = cat_id_query.scalars().first()
-                    print(category_id)
                     news_id_query = await session.execute(text(f"SELECT id FROM news WHERE title = '{obj['title']}'"))
                     news_id = news_id_query.scalars().first()
                     cat_news = CategoryNewsCreate(
@@ -86,6 +86,14 @@ async def add_news_to_db_from_media_info(
                         news_id=news_id
                     )
                     stmt = insert(category_news_table).values(**cat_news.model_dump())
+                    await session.execute(stmt)
+                    await session.commit()
+
+                    cat_site = CategorySiteCreate(
+                        category_id=category_id,
+                        site_id=1
+                    )
+                    stmt = insert(category_site_table).values(**cat_site.model_dump())
                     await session.execute(stmt)
                     await session.commit()
             except Exception:
@@ -99,7 +107,8 @@ async def add_news_to_db_from_media_info(
 
 @parsing_router.get(
     path="/naked_science",
-    description="Сбор данных с сайта naked-science.ru"
+    description=f"Сбор данных с сайта naked-science.ru за сегодняшний день. "
+                f"Перед использованием необходимо добавить объект Site!"
 )
 async def add_news_to_db_from_naked_science(
     session: AsyncSession = Depends(get_async_session)
@@ -152,7 +161,6 @@ async def add_news_to_db_from_naked_science(
                 for cat in obj["category_list"]:
                     cat_id_query = await session.execute(text(f"SELECT id FROM category WHERE title = '{cat}'"))
                     category_id = cat_id_query.scalars().first()
-                    print(category_id)
                     news_id_query = await session.execute(text(f"SELECT id FROM news WHERE title = '{obj['title']}'"))
                     news_id = news_id_query.scalars().first()
                     cat_news = CategoryNewsCreate(
@@ -160,6 +168,14 @@ async def add_news_to_db_from_naked_science(
                         news_id=news_id
                     )
                     stmt = insert(category_news_table).values(**cat_news.model_dump())
+                    await session.execute(stmt)
+                    await session.commit()
+
+                    cat_site = CategorySiteCreate(
+                        category_id=category_id,
+                        site_id=2
+                    )
+                    stmt = insert(category_site_table).values(**cat_site.model_dump())
                     await session.execute(stmt)
                     await session.commit()
             except Exception:

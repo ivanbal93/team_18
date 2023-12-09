@@ -16,6 +16,14 @@ category_news_table = Table(  # ассоциативная таблица M-t-M
 )
 
 
+category_site_table = Table(  # ассоциативная таблица M-t-M
+    "category_site",
+    Base.metadata,
+    Column("category_id", ForeignKey("category.id", ondelete="CASCADE"), primary_key=True),
+    Column("site_id", ForeignKey("site.id", ondelete="CASCADE"), primary_key=True)
+)
+
+
 class Site(Base):
     '''Класс используемых сайтов'''
 
@@ -29,6 +37,14 @@ class Site(Base):
         backref="site",
         cascade="save-update, merge, delete",
         passive_deletes=True
+    )
+    category_list = relationship(
+        argument="Category",
+        secondary=category_site_table,
+        back_populates="site_list",
+        cascade="save-update, merge, delete",
+        passive_deletes=True,
+        lazy="subquery"
     )
 
 
@@ -45,6 +61,14 @@ class Category(Base):
         back_populates="category_list",
         cascade="save-update, merge, delete",
         passive_deletes=True
+    )
+    site_list = relationship(
+        argument="Site",
+        secondary=category_site_table,
+        back_populates="category_list",
+        cascade="save-update, merge, delete",
+        passive_deletes=True,
+        lazy="subquery"
     )
 
 
